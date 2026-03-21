@@ -30,6 +30,9 @@
                     <option value="57600">57600</option>
                     <option value="115200" selected>115200</option>
                 </select>
+                <button id="configBtn" class="btn btn-config" title="Configurar IA">
+                    <span class="btn-icon">*</span>
+                </button>
                 <div class="status-indicator">
                     <span id="statusDot" class="status-dot disconnected"></span>
                     <span id="statusText" class="status-text">Desconectado</span>
@@ -58,8 +61,8 @@
                         <!-- Mensagem inicial do sistema -->
                         <div class="message system">
                             <div class="message-bubble">
-                                <p>Ola! Sou seu assistente de programacao BitDogLab.</p>
-                                <p>Conecte sua placa via USB e me peca para criar codigos MicroPython!</p>
+                                <p>⚡ Bem-vindo ao BitDogLab AI!</p>
+                                <p>Sou seu assistente de programação. Conecte sua placa via USB e peça-me para criar códigos MicroPython!</p>
                             </div>
                             <span class="message-time">agora</span>
                         </div>
@@ -108,8 +111,44 @@
         </main>
     </div>
 
+    <!-- Modal de Configuracao da IA -->
+    <div id="configModal" class="modal hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <h2 class="modal-title">Configurar IA</h2>
+            <div class="modal-body">
+                <label class="form-label">Provedor</label>
+                <select id="providerSelect" class="select form-select">
+                    <option value="">-- Selecione --</option>
+                    <option value="kimi">Kimi (Moonshot)</option>
+                    <option value="glm">GLM (Zhipu)</option>
+                    <option value="qwen">Qwen (Alibaba)</option>
+                    <option value="minimax">Minimax</option>
+                    <option value="openai">OpenAI</option>
+                    <option value="custom">Personalizado</option>
+                </select>
+
+                <label class="form-label">URL Base da API</label>
+                <input type="text" id="configBaseUrl" class="form-input" placeholder="https://api.exemplo.com/v1">
+
+                <label class="form-label">Modelo</label>
+                <select id="configModel" class="select form-select" id="configModelSelect">
+                </select>
+                <input type="text" id="configModelCustom" class="form-input hidden" placeholder="nome-do-modelo">
+
+                <label class="form-label">API Key</label>
+                <input type="password" id="configApiKey" class="form-input" placeholder="Sua chave de API">
+            </div>
+            <div class="modal-footer">
+                <button id="configSaveBtn" class="btn btn-save">Salvar</button>
+                <button id="configCancelBtn" class="btn btn-cancel">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
     <script src="lib/xterm/xterm.js"></script>
     <script src="js/webserial.js"></script>
+    <script src="js/ai.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>

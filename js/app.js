@@ -55,11 +55,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     term.open(document.getElementById('terminal'));
     
-    // Mensagem inicial no terminal
-    term.writeln('\r\n\x1b[36m╔══════════════════════════════════════╗\x1b[0m');
-    term.writeln('\x1b[36m║    BitDogLab AI WebSerial Terminal   ║\x1b[0m');
-    term.writeln('\x1b[36m╚══════════════════════════════════════╝\x1b[0m');
-    term.writeln('\r\n\x1b[90mClique em "Conectar" para selecionar uma porta serial.\x1b[0m\r\n');
+    // Mensagem inicial no terminal - Tema Neon
+    term.writeln('\r\n\x1b[35m╔══════════════════════════════════════════════════╗\x1b[0m');
+    term.writeln('\x1b[35m║\x1b[0m  \x1b[96mBitDogLab AI\x1b[0m - \x1b[95mWebSerial Terminal\x1b[0m              \x1b[35m║\x1b[0m');
+    term.writeln('\x1b[35m╚══════════════════════════════════════════════════╝\x1b[0m');
+    term.writeln('\r\n\x1b[90m[*] Clique em \x1b[92m"Conectar"\x1b[90m para selecionar uma porta serial\x1b[0m');
+    term.writeln('\x1b[90m[*] Compativel com MicroPython e BitDogLab\x1b[0m\r\n');
 
     // ==========================================
     // Callbacks do WebSerial
