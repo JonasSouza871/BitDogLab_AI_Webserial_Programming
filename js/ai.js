@@ -4,11 +4,12 @@
  */
 class AI {
     constructor() {
-        // Carrega config do config.js
+        // Carrega config do config.js (local) ou usa proxy (produção)
         const cfg = typeof AI_CONFIG !== 'undefined' ? AI_CONFIG : {};
         this.apiKey = cfg.apiKey || '';
         this.baseUrl = cfg.baseUrl || '';
         this.model = cfg.model || '';
+        this.useProxy = !this.apiKey;
         this.systemPrompt = '';
         this.musicContext = '';
         this.history = [];
@@ -43,7 +44,7 @@ class AI {
      * Verifica se a API esta configurada
      */
     isConfigured() {
-        return this.apiKey && this.apiKey !== 'SUA_API_KEY_AQUI' && this.baseUrl && this.model;
+        return this.useProxy || (this.apiKey && this.apiKey !== 'SUA_API_KEY_AQUI' && this.baseUrl && this.model);
     }
 
     /**
@@ -75,21 +76,25 @@ class AI {
             ...this.history.slice(-this.maxHistory)
         ];
 
-        const baseUrl = this.baseUrl.replace(/\/+$/, '');
-        const url = `${baseUrl}/chat/completions`;
-
         try {
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${this.apiKey}`
-                },
-                body: JSON.stringify({
-                    model: this.model,
-                    messages: messages
-                })
-            });
+            let response;
+            if (this.useProxy) {
+                response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ messages })
+                });
+            } else {
+                const baseUrl = this.baseUrl.replace(/\/+$/, '');
+                response = await fetch(`${baseUrl}/chat/completions`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${this.apiKey}`
+                    },
+                    body: JSON.stringify({ model: this.model, messages })
+                });
+            }
 
             if (response.status === 429 && _retry < 2) {
                 await new Promise(r => setTimeout(r, 10000));

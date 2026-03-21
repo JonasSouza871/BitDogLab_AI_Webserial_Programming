@@ -722,6 +722,13 @@ html, body {
 
 .terminal .xterm {
     height: 100%;
+    padding: 0;
+}
+
+/* Alinhamento perfeito das linhas */
+.terminal .xterm-rows > div {
+    height: 17px !important;
+    line-height: 17px !important;
 }
 
 /* Terminal mais compacto */
