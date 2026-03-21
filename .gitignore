@@ -1,0 +1,35 @@
+# === Agentes IA (skills, contexto interno) ===
+.agent/
+.claude/
+
+# === Segredos e config local ===
+.env
+.env.local
+.env.production
+*.key
+*.pem
+
+# === Dependencias ===
+node_modules/
+
+# === Sistema Operacional ===
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# === IDEs ===
+.vscode/
+.idea/
+*.swp
+*~
+
+# === Temporarios ===
+*.tmp
+*.temp
+*.bak
+*.log
+logs/
+
+# === Build (futuro) ===
+dist/
+build/

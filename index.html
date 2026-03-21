@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSerial Terminal</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="lib/xterm/xterm.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔌 WebSerial Terminal</h1>
+            <div class="controls">
+                <button id="connectBtn" class="btn btn-connect">Conectar</button>
+                <button id="disconnectBtn" class="btn btn-disconnect" disabled>Desconectar</button>
+                <button id="clearBtn" class="btn btn-clear">Limpar</button>
+                <select id="baudRate">
+                    <option value="9600">9600</option>
+                    <option value="19200">19200</option>
+                    <option value="38400">38400</option>
+                    <option value="57600">57600</option>
+                    <option value="115200" selected>115200</option>
+                </select>
+            </div>
+        </header>
+
+        <div class="status-bar">
+            <span id="statusIndicator" class="status disconnected">●</span>
+            <span id="statusText">Desconectado</span>
+        </div>
+
+        <div id="terminal"></div>
+
+        <div class="input-area">
+            <input type="text" id="commandInput" placeholder="Digite um comando e pressione Enter..." disabled>
+            <button id="sendBtn" class="btn btn-send" disabled>Enviar</button>
+            <button id="ctrlCBtn" class="btn btn-ctrl" disabled>Ctrl+C</button>
+            <button id="ctrlDBtn" class="btn btn-ctrl" disabled>Ctrl+D</button>
+        </div>
+    </div>
+
+    <script src="lib/xterm/xterm.js"></script>
+    <script src="js/webserial.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
