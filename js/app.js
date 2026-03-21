@@ -1,6 +1,6 @@
 /**
  * App - BitDogLab AI WebSerial
- * Frontend simples e amigável
+ * Frontend com syntax highlight e envio de código
  */
 document.addEventListener('DOMContentLoaded', () => {
     // Elementos da UI
@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     term.open(document.getElementById('terminal'));
     
-    // Mensagem inicial simples
+    // Mensagem inicial
     term.writeln('\r\nBitDogLab - Terminal');
     term.writeln('--------------------');
     term.writeln('Clique em "Conectar" para começar.\r\n');
@@ -122,7 +122,10 @@ document.addEventListener('DOMContentLoaded', () => {
         term.writeln('^D');
     });
 
+    // ==========================================
     // Funções do Chat
+    // ==========================================
+    
     function addMessage(text, type = 'user') {
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${type}`;
@@ -145,10 +148,163 @@ document.addEventListener('DOMContentLoaded', () => {
         messageDiv.appendChild(timeSpan);
         messagesContainer.appendChild(messageDiv);
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        
+        return { messageDiv, bubbleDiv };
     }
 
     function addUserMessage(text) { addMessage(text, 'user'); }
     function addSystemMessage(text) { addMessage(text, 'system'); }
+
+    // Adiciona mensagem da IA com suporte a código
+    function addAIMessage(text) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'message ai';
+        
+        const bubbleDiv = document.createElement('div');
+        bubbleDiv.className = 'message-bubble';
+        
+        // Processa blocos de código
+        const parts = text.split(/(```(?:python|micropython)?\s*\n[\s\S]*?```)/g);
+        
+        parts.forEach(part => {
+            if (part.startsWith('```')) {
+                // Extrai código
+                const codeMatch = part.match(/```(?:python|micropython)?\s*\n([\s\S]*?)```/);
+                if (codeMatch) {
+                    const code = codeMatch[1].trim();
+                    const codeBlock = createCodeBlock(code);
+                    bubbleDiv.appendChild(codeBlock);
+                }
+            } else if (part.trim()) {
+                // Texto normal
+                const p = document.createElement('p');
+                p.textContent = part.trim();
+                bubbleDiv.appendChild(p);
+            }
+        });
+        
+        const timeSpan = document.createElement('span');
+        timeSpan.className = 'message-time';
+        timeSpan.textContent = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        
+        messageDiv.appendChild(bubbleDiv);
+        messageDiv.appendChild(timeSpan);
+        messagesContainer.appendChild(messageDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        
+        return messageDiv;
+    }
+
+    // Cria bloco de código com syntax highlight
+    function createCodeBlock(code) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'code-block';
+        
+        // Syntax highlight
+        const highlightedCode = highlightPython(code);
+        
+        const pre = document.createElement('pre');
+        const codeEl = document.createElement('code');
+        codeEl.innerHTML = highlightedCode;
+        pre.appendChild(codeEl);
+        wrapper.appendChild(pre);
+        
+        // Botão enviar para placa
+        const btn = document.createElement('button');
+        btn.className = 'btn-send-code';
+        btn.textContent = 'Enviar para placa';
+        btn.addEventListener('click', () => sendCodeToBoard(code, btn));
+        wrapper.appendChild(btn);
+        
+        return wrapper;
+    }
+
+    // Syntax highlight simples para Python
+    function highlightPython(code) {
+        return code
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/(#.*$)/gm, '<span class="comment">$1</span>')
+            .replace(/\b(def|class|if|else|elif|for|while|try|except|finally|import|from|as|return|break|continue|pass|True|False|None|and|or|not|in|is|lambda|with|yield|async|await)\b/g, '<span class="keyword">$1</span>')
+            .replace(/\b(print|len|range|str|int|float|list|dict|tuple|set|open|input|enumerate|zip|map|filter|sum|min|max|abs|round|type|isinstance|hasattr|getattr|setattr|dir|help)\b/g, '<span class="builtin">$1</span>')
+            .replace(/\b(\d+)\b/g, '<span class="number">$1</span>')
+            .replace(/(['"])(.*?)\1/g, '<span class="string">$&</span>');
+    }
+
+    // Envia código para a placa
+    async function sendCodeToBoard(code, button) {
+        if (!serial.connected) {
+            addSystemMessage('Conecte sua placa primeiro!');
+            return;
+        }
+
+        button.textContent = 'Enviando...';
+        button.disabled = true;
+
+        try {
+            // Ctrl+C para interromper
+            await serial.sendCtrlC();
+            await sleep(100);
+
+            // Modo paste (Ctrl+E)
+            await serial.write('\x05');
+            await sleep(100);
+
+            // Envia código linha por linha
+            const lines = code.split('\n');
+            for (const line of lines) {
+                await serial.write(line + '\r\n');
+                await sleep(20);
+            }
+
+            // Executa (Ctrl+D)
+            await serial.write('\x04');
+
+            button.textContent = 'Enviado!';
+            addSystemMessage('Código enviado com sucesso!');
+        } catch (error) {
+            button.textContent = 'Erro';
+            addSystemMessage('Erro ao enviar: ' + error.message);
+        }
+
+        setTimeout(() => {
+            button.textContent = 'Enviar para placa';
+            button.disabled = false;
+        }, 2000);
+    }
+
+    function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    // Indicador de "pensando..."
+    function showThinkingIndicator() {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'message ai thinking';
+        messageDiv.id = 'thinkingIndicator';
+        
+        const bubbleDiv = document.createElement('div');
+        bubbleDiv.className = 'message-bubble';
+        
+        const dots = document.createElement('div');
+        dots.className = 'thinking-dots';
+        dots.innerHTML = '<span></span><span></span><span></span>';
+        
+        bubbleDiv.appendChild(dots);
+        messageDiv.appendChild(bubbleDiv);
+        messagesContainer.appendChild(messageDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        
+        return messageDiv;
+    }
+
+    function hideThinkingIndicator() {
+        const indicator = document.getElementById('thinkingIndicator');
+        if (indicator) {
+            indicator.remove();
+        }
+    }
 
     function sendChatMessage() {
         const text = chatInput.value.trim();
@@ -156,14 +312,28 @@ document.addEventListener('DOMContentLoaded', () => {
         addUserMessage(text);
         chatInput.value = '';
         
-        // Resposta temporária da IA (integração futura)
+        // Mostra indicador de pensando
+        showThinkingIndicator();
+        
+        // Simula resposta da IA (Claude vai integrar depois)
         setTimeout(() => {
-            addSystemMessage('Assistente em breve! Por enquanto use o terminal para programar.');
-        }, 500);
+            hideThinkingIndicator();
+            addAIMessage('Aqui está um exemplo de código:\n\n```python\nfrom machine import Pin\nimport time\n\nled = Pin(25, Pin.OUT)\n\nwhile True:\n    led.value(1)\n    time.sleep(0.5)\n    led.value(0)\n    time.sleep(0.5)\n```\n\nEste código faz o LED piscar!');
+        }, 1500);
     }
 
     chatSendBtn.addEventListener('click', sendChatMessage);
     chatInput.addEventListener('keypress', (e) => e.key === 'Enter' && sendChatMessage());
+
+    // Expor funções para integração com Claude
+    window.ChatUI = {
+        addUserMessage,
+        addAIMessage,
+        addSystemMessage,
+        showThinkingIndicator,
+        hideThinkingIndicator,
+        serial
+    };
 
     // Mobile tabs
     tabBtns.forEach(btn => {
