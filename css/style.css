@@ -162,6 +162,76 @@ html, body {
     gap: 12px;
 }
 
+/* Token Tracker */
+.token-tracker {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 4px 10px;
+    font-size: 11px;
+}
+
+.token-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1.2;
+}
+
+.token-label {
+    color: var(--color-text-muted);
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.token-count {
+    color: var(--neon-green);
+    font-weight: 700;
+    font-size: 12px;
+    font-family: 'SF Mono', Monaco, Consolas, monospace;
+}
+
+.token-bar-bg {
+    width: 60px;
+    height: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.token-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--neon-green), var(--neon-blue));
+    border-radius: 3px;
+    transition: width 0.5s ease, background 0.5s ease;
+}
+
+.token-bar-fill.warning {
+    background: linear-gradient(90deg, var(--color-warning), #ff8c00);
+}
+
+.token-bar-fill.danger {
+    background: linear-gradient(90deg, var(--color-danger), #ff0040);
+}
+
+.token-requests {
+    color: var(--color-text-muted);
+    font-size: 10px;
+    white-space: nowrap;
+    font-family: 'SF Mono', Monaco, Consolas, monospace;
+}
+
+@media (max-width: 768px) {
+    .token-tracker {
+        display: none;
+    }
+}
+
 /* Buttons Neon */
 .btn {
     display: inline-flex;
@@ -654,15 +724,26 @@ html, body {
     height: 100%;
 }
 
-/* Padding mais compacto no terminal */
+/* Terminal mais compacto */
 .terminal {
-    padding: 10px 12px;
+    padding: 8px 10px;
 }
 
-/* Estilo das linhas do terminal */
+/* Estilo das linhas do terminal - azul marinho */
 .terminal .xterm-rows {
-    font-size: 13px;
-    line-height: 1.35;
+    font-size: 12.5px;
+    line-height: 1.25;
+    color: #89b4fa;
+}
+
+/* Cursor do terminal */
+.terminal .xterm-cursor {
+    background-color: #b829dd !important;
+}
+
+/* Seleção no terminal */
+.terminal .xterm-selection div {
+    background-color: rgba(137, 180, 250, 0.3) !important;
 }
 
 .terminal-input-area {

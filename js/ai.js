@@ -14,6 +14,10 @@ class AI {
         this.history = [];
         this.maxHistory = 4;
         this.musicKeywords = /musica|música|tocar|melodia|song|buzzer|nota|jingle|natal|natalina|sao joao|são joão|parabens|parabéns|baby|bieber|star wars|harry potter|mario|piratas|beethoven|despacito|asa branca|balao|balão|brilha|estrelinha|fur elise|imperial/i;
+        this.tokensUsed = 0;
+        this.requestCount = 0;
+        this.dailyLimit = 14400;
+        this.onUsageUpdate = null;
     }
 
     /**
@@ -100,6 +104,12 @@ class AI {
             const data = await response.json();
             const fullResponse = data.choices[0].message.content;
 
+            if (data.usage) {
+                this.tokensUsed += data.usage.total_tokens || 0;
+                this.requestCount++;
+                if (this.onUsageUpdate) this.onUsageUpdate(this.getUsage());
+            }
+
             this.history.push({ role: 'assistant', content: fullResponse });
 
             if (this.history.length > this.maxHistory) {
@@ -111,6 +121,15 @@ class AI {
             if (_retry === 0) this.history.pop();
             throw error;
         }
+    }
+
+    getUsage() {
+        return {
+            tokens: this.tokensUsed,
+            requests: this.requestCount,
+            dailyLimit: this.dailyLimit,
+            pct: Math.min(100, (this.requestCount / this.dailyLimit) * 100)
+        };
     }
 
     /**

@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
         cursorBlink: true,
         theme: {
             background: '#161221',
-            foreground: '#e6e1f0',
+            foreground: '#89b4fa',
             cursor: '#b829dd',
             selection: 'rgba(184, 41, 221, 0.3)',
             black: '#2d2440',
@@ -380,6 +380,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Carrega contexto do hardware
     ai.loadContext();
+
+    // Token tracker
+    const tokenCount = document.getElementById('tokenCount');
+    const tokenBarFill = document.getElementById('tokenBarFill');
+    const requestCountEl = document.getElementById('requestCount');
+
+    ai.onUsageUpdate = (usage) => {
+        tokenCount.textContent = usage.tokens.toLocaleString('pt-BR');
+        requestCountEl.textContent = usage.requests.toLocaleString('pt-BR');
+        tokenBarFill.style.width = Math.min(usage.pct, 100) + '%';
+        tokenBarFill.classList.remove('warning', 'danger');
+        if (usage.pct > 80) tokenBarFill.classList.add('danger');
+        else if (usage.pct > 50) tokenBarFill.classList.add('warning');
+    };
 
     window.ChatUI = {
         addUserMessage,
