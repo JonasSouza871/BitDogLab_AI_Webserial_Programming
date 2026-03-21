@@ -654,6 +654,17 @@ html, body {
     height: 100%;
 }
 
+/* Padding mais compacto no terminal */
+.terminal {
+    padding: 10px 12px;
+}
+
+/* Estilo das linhas do terminal */
+.terminal .xterm-rows {
+    font-size: 13px;
+    line-height: 1.35;
+}
+
 .terminal-input-area {
     display: flex;
     gap: 10px;

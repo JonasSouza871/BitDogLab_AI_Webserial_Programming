@@ -24,18 +24,36 @@ document.addEventListener('DOMContentLoaded', () => {
     // Instância do WebSerial
     const serial = new WebSerial();
 
-    // Terminal xterm.js
+    // Terminal xterm.js - Tema customizado
     const term = new Terminal({
         cursorBlink: true,
         theme: {
             background: '#161221',
-            foreground: '#f0f0f0',
+            foreground: '#e6e1f0',
             cursor: '#b829dd',
-            selection: 'rgba(184, 41, 221, 0.3)'
+            selection: 'rgba(184, 41, 221, 0.3)',
+            black: '#2d2440',
+            red: '#ff3860',
+            green: '#39ff14',
+            yellow: '#ffd700',
+            blue: '#00d4ff',
+            magenta: '#b829dd',
+            cyan: '#4ec9b0',
+            white: '#f0f0f0',
+            brightBlack: '#4a4060',
+            brightRed: '#ff6b8a',
+            brightGreen: '#5aff3a',
+            brightYellow: '#ffe44d',
+            brightBlue: '#4de1ff',
+            brightMagenta: '#d14dff',
+            brightCyan: '#6fdfc5',
+            brightWhite: '#ffffff'
         },
-        fontSize: 14,
-        fontFamily: 'SF Mono, Monaco, monospace',
-        scrollback: 10000
+        fontSize: 13,
+        fontFamily: 'SF Mono, Monaco, Consolas, monospace',
+        scrollback: 10000,
+        lineHeight: 1.3,
+        letterSpacing: 0.5
     });
 
     term.open(document.getElementById('terminal'));
@@ -155,81 +173,46 @@ document.addEventListener('DOMContentLoaded', () => {
     function addUserMessage(text) { addMessage(text, 'user'); }
     function addSystemMessage(text) { addMessage(text, 'system'); }
 
-    // Adiciona mensagem da IA com suporte a código
+    // Adiciona mensagem da IA - so mostra codigo + botao enviar
     function addAIMessage(text) {
-        const messageDiv = document.createElement('div');
-        messageDiv.className = 'message ai';
-        
-        const bubbleDiv = document.createElement('div');
-        bubbleDiv.className = 'message-bubble';
-        
-        // Processa blocos de código
-        const parts = text.split(/(```(?:python|micropython)?\s*\n[\s\S]*?```)/g);
-        
-        parts.forEach(part => {
-            if (part.startsWith('```')) {
-                // Extrai código
-                const codeMatch = part.match(/```(?:python|micropython)?\s*\n([\s\S]*?)```/);
-                if (codeMatch) {
-                    const code = codeMatch[1].trim();
-                    const codeBlock = createCodeBlock(code);
-                    bubbleDiv.appendChild(codeBlock);
-                }
-            } else if (part.trim()) {
-                // Texto normal
-                const p = document.createElement('p');
-                p.textContent = part.trim();
-                bubbleDiv.appendChild(p);
-            }
-        });
-        
-        const timeSpan = document.createElement('span');
-        timeSpan.className = 'message-time';
-        timeSpan.textContent = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-        
-        messageDiv.appendChild(bubbleDiv);
-        messageDiv.appendChild(timeSpan);
-        messagesContainer.appendChild(messageDiv);
+        const codes = AI.extractCode(text);
+
+        if (codes.length > 0) {
+            // Mostra cada bloco de codigo separado
+            codes.forEach(code => {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'message ai';
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'code-block';
+
+                const pre = document.createElement('pre');
+                const codeEl = document.createElement('code');
+                codeEl.textContent = code;
+                pre.appendChild(codeEl);
+                wrapper.appendChild(pre);
+
+                const btn = document.createElement('button');
+                btn.className = 'btn-send-code';
+                btn.textContent = 'Enviar para placa';
+                btn.addEventListener('click', () => sendCodeToBoard(code, btn));
+                wrapper.appendChild(btn);
+
+                messageDiv.appendChild(wrapper);
+
+                const timeSpan = document.createElement('span');
+                timeSpan.className = 'message-time';
+                timeSpan.textContent = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                messageDiv.appendChild(timeSpan);
+
+                messagesContainer.appendChild(messageDiv);
+            });
+        } else {
+            // Sem codigo - mostra texto normal
+            addMessage(text, 'ai');
+        }
+
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        
-        return messageDiv;
-    }
-
-    // Cria bloco de código com syntax highlight
-    function createCodeBlock(code) {
-        const wrapper = document.createElement('div');
-        wrapper.className = 'code-block';
-        
-        // Syntax highlight
-        const highlightedCode = highlightPython(code);
-        
-        const pre = document.createElement('pre');
-        const codeEl = document.createElement('code');
-        codeEl.innerHTML = highlightedCode;
-        pre.appendChild(codeEl);
-        wrapper.appendChild(pre);
-        
-        // Botão enviar para placa
-        const btn = document.createElement('button');
-        btn.className = 'btn-send-code';
-        btn.textContent = 'Enviar para placa';
-        btn.addEventListener('click', () => sendCodeToBoard(code, btn));
-        wrapper.appendChild(btn);
-        
-        return wrapper;
-    }
-
-    // Syntax highlight simples para Python
-    function highlightPython(code) {
-        return code
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/(#.*$)/gm, '<span class="comment">$1</span>')
-            .replace(/\b(def|class|if|else|elif|for|while|try|except|finally|import|from|as|return|break|continue|pass|True|False|None|and|or|not|in|is|lambda|with|yield|async|await)\b/g, '<span class="keyword">$1</span>')
-            .replace(/\b(print|len|range|str|int|float|list|dict|tuple|set|open|input|enumerate|zip|map|filter|sum|min|max|abs|round|type|isinstance|hasattr|getattr|setattr|dir|help)\b/g, '<span class="builtin">$1</span>')
-            .replace(/\b(\d+)\b/g, '<span class="number">$1</span>')
-            .replace(/(['"])(.*?)\1/g, '<span class="string">$&</span>');
     }
 
     // Envia código para a placa
