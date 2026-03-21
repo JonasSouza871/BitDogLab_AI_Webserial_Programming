@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const term = new Terminal({
         cursorBlink: true,
         theme: {
-            background: '#0f0c1a',
+            background: '#161221',
             foreground: '#f0f0f0',
             cursor: '#b829dd',
             selection: 'rgba(184, 41, 221, 0.3)'
@@ -306,26 +306,106 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function sendChatMessage() {
+    async function sendChatMessage() {
         const text = chatInput.value.trim();
         if (!text) return;
         addUserMessage(text);
         chatInput.value = '';
-        
-        // Mostra indicador de pensando
+
+        if (!ai.isConfigured()) {
+            addSystemMessage('Configure a IA primeiro. Clique na engrenagem no header.');
+            return;
+        }
+
         showThinkingIndicator();
-        
-        // Simula resposta da IA (Claude vai integrar depois)
-        setTimeout(() => {
+
+        try {
+            const response = await ai.send(text);
             hideThinkingIndicator();
-            addAIMessage('Aqui está um exemplo de código:\n\n```python\nfrom machine import Pin\nimport time\n\nled = Pin(25, Pin.OUT)\n\nwhile True:\n    led.value(1)\n    time.sleep(0.5)\n    led.value(0)\n    time.sleep(0.5)\n```\n\nEste código faz o LED piscar!');
-        }, 1500);
+            addAIMessage(response);
+        } catch (error) {
+            hideThinkingIndicator();
+            addSystemMessage('Erro da IA: ' + error.message);
+        }
     }
 
     chatSendBtn.addEventListener('click', sendChatMessage);
     chatInput.addEventListener('keypress', (e) => e.key === 'Enter' && sendChatMessage());
 
-    // Expor funções para integração com Claude
+    // ==========================================
+    // Modal de Configuracao da IA
+    // ==========================================
+    const configBtn = document.getElementById('configBtn');
+    const configModal = document.getElementById('configModal');
+    const configSaveBtn = document.getElementById('configSaveBtn');
+    const configCancelBtn = document.getElementById('configCancelBtn');
+    const providerSelect = document.getElementById('providerSelect');
+    const configBaseUrl = document.getElementById('configBaseUrl');
+    const configModelSelect = document.getElementById('configModel');
+    const configModelCustom = document.getElementById('configModelCustom');
+    const configApiKey = document.getElementById('configApiKey');
+
+    function openConfigModal() {
+        configModal.classList.remove('hidden');
+        const config = ai.getConfig();
+        configBaseUrl.value = config.baseUrl;
+        configApiKey.value = config.apiKey;
+        configModelCustom.value = config.model;
+    }
+
+    function closeConfigModal() {
+        configModal.classList.add('hidden');
+    }
+
+    configBtn.addEventListener('click', openConfigModal);
+    configCancelBtn.addEventListener('click', closeConfigModal);
+    configModal.querySelector('.modal-overlay').addEventListener('click', closeConfigModal);
+
+    providerSelect.addEventListener('change', () => {
+        const provider = AI.PROVIDERS[providerSelect.value];
+        if (provider) {
+            configBaseUrl.value = provider.baseUrl;
+            configModelSelect.innerHTML = '';
+            provider.models.forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m;
+                opt.textContent = m;
+                configModelSelect.appendChild(opt);
+            });
+            configModelSelect.classList.remove('hidden');
+            configModelCustom.classList.add('hidden');
+        } else {
+            configBaseUrl.value = '';
+            configModelSelect.classList.add('hidden');
+            configModelCustom.classList.remove('hidden');
+            configModelCustom.value = '';
+        }
+    });
+
+    configSaveBtn.addEventListener('click', () => {
+        const baseUrl = configBaseUrl.value.trim();
+        const apiKey = configApiKey.value.trim();
+        const model = configModelCustom.classList.contains('hidden')
+            ? configModelSelect.value
+            : configModelCustom.value.trim();
+
+        if (!baseUrl || !apiKey || !model) {
+            addSystemMessage('Preencha todos os campos.');
+            return;
+        }
+
+        ai.saveConfig(apiKey, baseUrl, model);
+        closeConfigModal();
+        addSystemMessage('IA configurada! Pode conversar.');
+    });
+
+    // Carrega contexto do hardware
+    ai.loadContext().then(() => {
+        if (!ai.isConfigured()) {
+            addSystemMessage('Configure a IA clicando na engrenagem.');
+        }
+    });
+
     window.ChatUI = {
         addUserMessage,
         addAIMessage,
