@@ -7,6 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const connectBtn = document.getElementById('connectBtn');
     const disconnectBtn = document.getElementById('disconnectBtn');
     const clearBtn = document.getElementById('clearBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const stopBtn = document.getElementById('stopBtn');
     const sendBtn = document.getElementById('sendBtn');
     const ctrlCBtn = document.getElementById('ctrlCBtn');
     const ctrlDBtn = document.getElementById('ctrlDBtn');
@@ -64,12 +66,34 @@ document.addEventListener('DOMContentLoaded', () => {
     term.writeln('Clique em "Conectar" para começar.\r\n');
 
     // Callbacks do WebSerial
-    serial.onData((data) => term.write(data));
+    let serialBuffer = '';
+    let micropythonReady = false;
+
+    serial.onData((data) => {
+        term.write(data);
+
+        // Detecta prompt do MicroPython (>>> )
+        serialBuffer += data;
+        serialBuffer = serialBuffer.slice(-50); // guarda so os ultimos 50 chars
+
+        if (serialBuffer.includes('>>>') && !micropythonReady) {
+            micropythonReady = true;
+            addSystemMessage('MicroPython pronto! Pode enviar codigos.');
+        }
+
+        // Detecta mensagem de boot do MicroPython
+        if (data.includes('MicroPython') && data.includes('Pico')) {
+            micropythonReady = false; // vai ficar true quando >>> aparecer
+        }
+    });
 
     serial.onConnect(() => {
         updateUIState(true);
+        micropythonReady = false;
         term.writeln('\r\n\x1b[32m[Conectado]\x1b[0m');
-        addSystemMessageHTML('Sua placa está <span style="color: #39ff14; font-weight: 600;">conectada</span>!');
+        addSystemMessage('Placa conectada! Aguardando MicroPython...');
+        // Envia Ctrl+C para ir ao prompt
+        setTimeout(() => serial.sendCtrlC(), 300);
     });
 
     serial.onDisconnect(() => {
@@ -82,6 +106,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateUIState(connected) {
         connectBtn.disabled = connected;
         disconnectBtn.disabled = !connected;
+        resetBtn.disabled = !connected;
+        stopBtn.disabled = !connected;
         sendBtn.disabled = !connected;
         ctrlCBtn.disabled = !connected;
         ctrlDBtn.disabled = !connected;
@@ -115,6 +141,22 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     disconnectBtn.addEventListener('click', () => serial.disconnect());
+
+    resetBtn.addEventListener('click', async () => {
+        if (!serial.connected) return;
+        micropythonReady = false;
+        await serial.sendCtrlD();
+        term.writeln('\x1b[33m[Reset - Ctrl+D]\x1b[0m');
+        addSystemMessage('Resetando placa...');
+    });
+
+    stopBtn.addEventListener('click', async () => {
+        if (!serial.connected) return;
+        await serial.sendCtrlC();
+        term.writeln('\x1b[33m[Parar - Ctrl+C]\x1b[0m');
+        addSystemMessage('Execucao interrompida.');
+    });
+
     clearBtn.addEventListener('click', () => term.clear());
     sendBtn.addEventListener('click', sendCommand);
     commandInput.addEventListener('keypress', (e) => e.key === 'Enter' && sendCommand());

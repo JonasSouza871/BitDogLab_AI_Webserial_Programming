@@ -10,8 +10,10 @@ class AI {
         this.baseUrl = cfg.baseUrl || '';
         this.model = cfg.model || '';
         this.systemPrompt = '';
+        this.musicContext = '';
         this.history = [];
-        this.maxHistory = 10;
+        this.maxHistory = 4;
+        this.musicKeywords = /musica|música|tocar|melodia|song|buzzer|nota|jingle|natal|natalina|sao joao|são joão|parabens|parabéns|baby|bieber|star wars|harry potter|mario|piratas|beethoven|despacito|asa branca|balao|balão|brilha|estrelinha|fur elise|imperial/i;
     }
 
     /**
@@ -24,6 +26,12 @@ class AI {
         } catch (error) {
             console.error('Erro ao carregar contexto:', error);
             this.systemPrompt = 'Voce e um assistente que gera codigo MicroPython para a BitDogLab (Raspberry Pi Pico).';
+        }
+        try {
+            const response = await fetch('context/musicas.md');
+            this.musicContext = await response.text();
+        } catch (error) {
+            this.musicContext = '';
         }
     }
 
@@ -44,15 +52,22 @@ class AI {
     /**
      * Envia mensagem para a IA e retorna resposta
      */
-    async send(userMessage) {
+    async send(userMessage, _retry = 0) {
         if (!this.isConfigured()) {
             throw new Error('API nao configurada. Verifique o arquivo js/config.js');
         }
 
-        this.history.push({ role: 'user', content: userMessage });
+        if (_retry === 0) {
+            this.history.push({ role: 'user', content: userMessage });
+        }
+
+        const isMusic = this.musicKeywords.test(userMessage);
+        const prompt = isMusic && this.musicContext
+            ? this.systemPrompt + '\n\n' + this.musicContext
+            : this.systemPrompt;
 
         const messages = [
-            { role: 'system', content: this.systemPrompt },
+            { role: 'system', content: prompt },
             ...this.history.slice(-this.maxHistory)
         ];
 
@@ -72,6 +87,11 @@ class AI {
                 })
             });
 
+            if (response.status === 429 && _retry < 2) {
+                await new Promise(r => setTimeout(r, 10000));
+                return this.send(userMessage, _retry + 1);
+            }
+
             if (!response.ok) {
                 const errorData = await response.text();
                 throw new Error(`API erro ${response.status}: ${errorData}`);
@@ -88,7 +108,7 @@ class AI {
 
             return fullResponse;
         } catch (error) {
-            this.history.pop();
+            if (_retry === 0) this.history.pop();
             throw error;
         }
     }
