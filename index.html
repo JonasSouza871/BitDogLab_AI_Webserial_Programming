@@ -12,6 +12,7 @@
         <!-- Header -->
         <header class="header">
             <div class="header-brand">
+                <img src="images/icon-bitdoglab-nobg.png" alt="BitDogLab" class="header-icon">
                 <span class="logo">BitDogLab</span>
                 <span class="badge">AI</span>
             </div>
@@ -23,15 +24,8 @@
                 <button id="disconnectBtn" class="btn btn-disconnect" disabled>
                     <span class="btn-text">Desconectar</span>
                 </button>
-                <select id="baudRate" class="select">
-                    <option value="9600">9600</option>
-                    <option value="19200">19200</option>
-                    <option value="38400">38400</option>
-                    <option value="57600">57600</option>
-                    <option value="115200" selected>115200</option>
-                </select>
                 <button id="configBtn" class="btn btn-config" title="Configurar IA">
-                    <span class="btn-icon">*</span>
+                    <span class="btn-icon">&#9881;</span>
                 </button>
                 <div class="status-indicator">
                     <span id="statusDot" class="status-dot disconnected"></span>
@@ -57,12 +51,12 @@
             <!-- Chat Section -->
             <section class="chat-section active" id="chatSection">
                 <div class="chat-container">
-                    <div class="messages" id="messages">
+                    <div class="messages" id="messages" style="position: relative;">
                         <!-- Mensagem inicial do sistema -->
                         <div class="message system">
                             <div class="message-bubble">
-                                <p>Bem-vindo ao BitDogLab AI!</p>
-                                <p>Sou seu assistente de programação. Conecte sua placa via USB e peça-me para criar códigos MicroPython!</p>
+                                <p>Olá! Sou seu assistente BitDogLab.</p>
+                                <p>Conecte sua placa no USB e me peça para criar programas!</p>
                             </div>
                             <span class="message-time">agora</span>
                         </div>
@@ -91,7 +85,16 @@
                 <div class="terminal-container">
                     <div class="terminal-toolbar">
                         <span class="terminal-title">Terminal Serial</span>
-                        <button id="clearBtn" class="btn btn-small">Limpar</button>
+                        <div class="terminal-controls">
+                            <select id="baudRate" class="select select-small">
+                                <option value="9600">9600</option>
+                                <option value="19200">19200</option>
+                                <option value="38400">38400</option>
+                                <option value="57600">57600</option>
+                                <option value="115200" selected>115200</option>
+                            </select>
+                            <button id="clearBtn" class="btn btn-small">Limpar</button>
+                        </div>
                     </div>
                     <div id="terminal" class="terminal"></div>
                     <div class="terminal-input-area">
@@ -132,7 +135,7 @@
                 <input type="text" id="configBaseUrl" class="form-input" placeholder="https://api.exemplo.com/v1">
 
                 <label class="form-label">Modelo</label>
-                <select id="configModel" class="select form-select" id="configModelSelect">
+                <select id="configModel" class="select form-select">
                 </select>
                 <input type="text" id="configModelCustom" class="form-input hidden" placeholder="nome-do-modelo">
 
