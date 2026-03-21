@@ -69,13 +69,13 @@ document.addEventListener('DOMContentLoaded', () => {
     serial.onConnect(() => {
         updateUIState(true);
         term.writeln('\r\n\x1b[32m[Conectado]\x1b[0m');
-        addSystemMessage('Sua placa está conectada!');
+        addSystemMessageHTML('Sua placa está <span style="color: #39ff14; font-weight: 600;">conectada</span>!');
     });
 
     serial.onDisconnect(() => {
         updateUIState(false);
         term.writeln('\r\n\x1b[31m[Desconectado]\x1b[0m');
-        addSystemMessage('Placa desconectada.');
+        addSystemMessageHTML('Placa <span style="color: #ff3860; font-weight: 600;">desconectada</span>.');
     });
 
     // Atualiza estado da UI
@@ -172,6 +172,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function addUserMessage(text) { addMessage(text, 'user'); }
     function addSystemMessage(text) { addMessage(text, 'system'); }
+    
+    function addSystemMessageHTML(html) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'message system';
+        
+        const bubbleDiv = document.createElement('div');
+        bubbleDiv.className = 'message-bubble';
+        
+        const p = document.createElement('p');
+        p.innerHTML = html;
+        bubbleDiv.appendChild(p);
+        
+        const timeSpan = document.createElement('span');
+        timeSpan.className = 'message-time';
+        timeSpan.textContent = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        
+        messageDiv.appendChild(bubbleDiv);
+        messageDiv.appendChild(timeSpan);
+        messagesContainer.appendChild(messageDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
 
     // Adiciona mensagem da IA - so mostra codigo + botao enviar
     function addAIMessage(text) {
