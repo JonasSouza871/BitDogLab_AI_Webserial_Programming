@@ -1,8 +1,11 @@
 /**
- * App - Interface do WebSerial Terminal
+ * App - BitDogLab AI WebSerial
+ * Frontend controller for chat and terminal
  */
 document.addEventListener('DOMContentLoaded', () => {
-    // Elementos da UI
+    // ==========================================
+    // Elementos da UI - Header & Terminal
+    // ==========================================
     const connectBtn = document.getElementById('connectBtn');
     const disconnectBtn = document.getElementById('disconnectBtn');
     const clearBtn = document.getElementById('clearBtn');
@@ -11,52 +14,75 @@ document.addEventListener('DOMContentLoaded', () => {
     const ctrlDBtn = document.getElementById('ctrlDBtn');
     const commandInput = document.getElementById('commandInput');
     const baudRateSelect = document.getElementById('baudRate');
-    const statusIndicator = document.getElementById('statusIndicator');
+    const statusDot = document.getElementById('statusDot');
     const statusText = document.getElementById('statusText');
 
-    // Instância do WebSerial
+    // ==========================================
+    // Elementos da UI - Chat
+    // ==========================================
+    const chatInput = document.getElementById('chatInput');
+    const chatSendBtn = document.getElementById('chatSendBtn');
+    const messagesContainer = document.getElementById('messages');
+
+    // ==========================================
+    // Elementos da UI - Mobile Tabs
+    // ==========================================
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const chatSection = document.getElementById('chatSection');
+    const terminalSection = document.getElementById('terminalSection');
+
+    // ==========================================
+    // Instancia do WebSerial
+    // ==========================================
     const serial = new WebSerial();
 
+    // ==========================================
     // Inicializa o terminal xterm.js
+    // ==========================================
     const term = new Terminal({
         cursorBlink: true,
         theme: {
-            background: '#1e1e1e',
-            foreground: '#f0f0f0',
-            cursor: '#f0f0f0',
-            selection: '#444444'
+            background: '#0d1117',
+            foreground: '#c9d1d9',
+            cursor: '#58a6ff',
+            selection: '#264f78'
         },
         fontSize: 14,
-        fontFamily: 'Consolas, Monaco, "Courier New", monospace',
-        scrollback: 10000
+        fontFamily: 'SF Mono, Monaco, Consolas, monospace',
+        scrollback: 10000,
+        allowProposedApi: true
     });
 
     term.open(document.getElementById('terminal'));
-    term.writeln('\x1b[32m╔══════════════════════════════════════╗\x1b[0m');
-    term.writeln('\x1b[32m║     WebSerial Terminal v1.0          ║\x1b[0m');
-    term.writeln('\x1b[32m╚══════════════════════════════════════╝\x1b[0m');
-    term.writeln('');
-    term.writeln('Clique em "Conectar" para selecionar uma porta serial.');
-    term.writeln('');
+    
+    // Mensagem inicial no terminal
+    term.writeln('\r\n\x1b[36m╔══════════════════════════════════════╗\x1b[0m');
+    term.writeln('\x1b[36m║    BitDogLab AI WebSerial Terminal   ║\x1b[0m');
+    term.writeln('\x1b[36m╚══════════════════════════════════════╝\x1b[0m');
+    term.writeln('\r\n\x1b[90mClique em "Conectar" para selecionar uma porta serial.\x1b[0m\r\n');
 
-    // Callback quando recebe dados
+    // ==========================================
+    // Callbacks do WebSerial
+    // ==========================================
     serial.onData((data) => {
         term.write(data);
     });
 
-    // Callback quando conecta
     serial.onConnect(() => {
         updateUIState(true);
         term.writeln('\x1b[32m\r\n[Conectado]\x1b[0m');
+        addSystemMessage('Placa conectada! Pronto para programar.');
     });
 
-    // Callback quando desconecta
     serial.onDisconnect(() => {
         updateUIState(false);
         term.writeln('\x1b[31m\r\n[Desconectado]\x1b[0m');
+        addSystemMessage('Placa desconectada.');
     });
 
-    // Atualiza estado da UI
+    // ==========================================
+    // Funcoes da UI - Terminal
+    // ==========================================
     function updateUIState(connected) {
         connectBtn.disabled = connected;
         disconnectBtn.disabled = !connected;
@@ -67,21 +93,22 @@ document.addEventListener('DOMContentLoaded', () => {
         baudRateSelect.disabled = connected;
 
         if (connected) {
-            statusIndicator.classList.remove('disconnected');
-            statusIndicator.classList.add('connected');
-            statusText.textContent = `Conectado (${baudRateSelect.value} baud)`;
-            commandInput.focus();
+            statusDot.classList.remove('disconnected');
+            statusDot.classList.add('connected');
+            statusText.textContent = `${baudRateSelect.value} baud`;
         } else {
-            statusIndicator.classList.remove('connected');
-            statusIndicator.classList.add('disconnected');
+            statusDot.classList.remove('connected');
+            statusDot.classList.add('disconnected');
             statusText.textContent = 'Desconectado';
         }
     }
 
-    // Botão Conectar
+    // ==========================================
+    // Event Listeners - Terminal Controls
+    // ==========================================
     connectBtn.addEventListener('click', async () => {
         if (!WebSerial.isSupported()) {
-            alert('Web Serial API não é suportada neste navegador.\nUse Chrome, Edge ou Opera.');
+            addSystemMessage('Web Serial API nao suportada. Use Chrome, Edge ou Opera.');
             return;
         }
 
@@ -96,27 +123,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Botão Desconectar
     disconnectBtn.addEventListener('click', async () => {
         await serial.disconnect();
     });
 
-    // Botão Limpar
     clearBtn.addEventListener('click', () => {
         term.clear();
     });
 
-    // Botão Enviar
     sendBtn.addEventListener('click', sendCommand);
 
-    // Enter no input
     commandInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
             sendCommand();
         }
     });
 
-    // Envia comando
     async function sendCommand() {
         const command = commandInput.value.trim();
         if (!command) return;
@@ -129,7 +151,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Botão Ctrl+C
     ctrlCBtn.addEventListener('click', async () => {
         try {
             await serial.sendCtrlC();
@@ -139,7 +160,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Botão Ctrl+D
     ctrlDBtn.addEventListener('click', async () => {
         try {
             await serial.sendCtrlD();
@@ -149,17 +169,144 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // ==========================================
+    // Funcoes do Chat
+    // ==========================================
+    function addMessage(text, type = 'user') {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${type}`;
+        
+        const bubbleDiv = document.createElement('div');
+        bubbleDiv.className = 'message-bubble';
+        
+        // Suporte a multiplas linhas
+        const lines = text.split('\n');
+        lines.forEach(line => {
+            const p = document.createElement('p');
+            p.textContent = line;
+            bubbleDiv.appendChild(p);
+        });
+        
+        const timeSpan = document.createElement('span');
+        timeSpan.className = 'message-time';
+        timeSpan.textContent = getCurrentTime();
+        
+        messageDiv.appendChild(bubbleDiv);
+        messageDiv.appendChild(timeSpan);
+        
+        messagesContainer.appendChild(messageDiv);
+        scrollToBottom();
+    }
+
+    function addUserMessage(text) {
+        addMessage(text, 'user');
+    }
+
+    function addAIMessage(text) {
+        addMessage(text, 'ai');
+    }
+
+    function addSystemMessage(text) {
+        addMessage(text, 'system');
+    }
+
+    function getCurrentTime() {
+        const now = new Date();
+        return now.toLocaleTimeString('pt-BR', { 
+            hour: '2-digit', 
+            minute: '2-digit' 
+        });
+    }
+
+    function scrollToBottom() {
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    function sendChatMessage() {
+        const text = chatInput.value.trim();
+        if (!text) return;
+
+        // Adiciona mensagem do usuario
+        addUserMessage(text);
+        
+        // Limpa input
+        chatInput.value = '';
+        
+        // Aqui sera integrado com a API de IA
+        // Por enquanto, simula uma resposta
+        simulateAIResponse(text);
+    }
+
+    function simulateAIResponse(userText) {
+        // Simula delay de "pensamento"
+        setTimeout(() => {
+            addSystemMessage('IA ainda nao configurada. Aguardando integracao com API...');
+        }, 1000);
+    }
+
+    // ==========================================
+    // Event Listeners - Chat
+    // ==========================================
+    chatSendBtn.addEventListener('click', sendChatMessage);
+
+    chatInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            sendChatMessage();
+        }
+    });
+
+    // ==========================================
+    // Mobile Tabs
+    // ==========================================
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tab = btn.dataset.tab;
+            
+            // Atualiza botoes
+            tabBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            // Atualiza secoes
+            if (tab === 'chat') {
+                chatSection.classList.add('active');
+                terminalSection.classList.remove('active');
+            } else {
+                chatSection.classList.remove('active');
+                terminalSection.classList.add('active');
+                // Refit terminal quando mostrado
+                setTimeout(() => {
+                    term.fit && term.fit();
+                }, 100);
+            }
+        });
+    });
+
+    // ==========================================
     // Resize do terminal
+    // ==========================================
     window.addEventListener('resize', () => {
         setTimeout(() => {
             term.fit && term.fit();
         }, 100);
     });
 
-    // Verifica suporte inicial
+    // ==========================================
+    // Inicializacao
+    // ==========================================
     if (!WebSerial.isSupported()) {
-        term.writeln('\x1b[31m\r\nAVISO: Web Serial API não suportada!\x1b[0m');
-        term.writeln('Use Chrome, Edge ou Opera para acessar esta funcionalidade.');
+        term.writeln('\x1b[31m\r\nAVISO: Web Serial API nao suportada!\x1b[0m');
+        term.writeln('\x1b[90mUse Chrome, Edge ou Opera.\x1b[0m');
         connectBtn.disabled = true;
+        addSystemMessage('Seu navegador nao suporta Web Serial. Use Chrome, Edge ou Opera.');
     }
+
+    // Expose functions for external use (Claude/AI integration)
+    window.ChatUI = {
+        addUserMessage,
+        addAIMessage,
+        addSystemMessage,
+        sendToTerminal: (code) => {
+            term.writeln(`\r\n\x1b[36m[Codigo recebido da IA]\x1b[0m`);
+        }
+    };
 });

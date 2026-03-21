@@ -3,41 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebSerial Terminal</title>
+    <title>BitDogLab AI WebSerial</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="lib/xterm/xterm.css">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>🔌 WebSerial Terminal</h1>
-            <div class="controls">
-                <button id="connectBtn" class="btn btn-connect">Conectar</button>
-                <button id="disconnectBtn" class="btn btn-disconnect" disabled>Desconectar</button>
-                <button id="clearBtn" class="btn btn-clear">Limpar</button>
-                <select id="baudRate">
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-brand">
+                <span class="logo">BitDogLab</span>
+                <span class="badge">AI</span>
+            </div>
+            <div class="header-controls">
+                <button id="connectBtn" class="btn btn-connect">
+                    <span class="btn-icon">+</span>
+                    <span class="btn-text">Conectar</span>
+                </button>
+                <button id="disconnectBtn" class="btn btn-disconnect" disabled>
+                    <span class="btn-text">Desconectar</span>
+                </button>
+                <select id="baudRate" class="select">
                     <option value="9600">9600</option>
                     <option value="19200">19200</option>
                     <option value="38400">38400</option>
                     <option value="57600">57600</option>
                     <option value="115200" selected>115200</option>
                 </select>
+                <div class="status-indicator">
+                    <span id="statusDot" class="status-dot disconnected"></span>
+                    <span id="statusText" class="status-text">Desconectado</span>
+                </div>
             </div>
         </header>
 
-        <div class="status-bar">
-            <span id="statusIndicator" class="status disconnected">●</span>
-            <span id="statusText">Desconectado</span>
+        <!-- Mobile Tabs -->
+        <div class="mobile-tabs">
+            <button class="tab-btn active" data-tab="chat">
+                <span class="tab-icon">@</span>
+                <span>Chat</span>
+            </button>
+            <button class="tab-btn" data-tab="terminal">
+                <span class="tab-icon">$</span>
+                <span>Terminal</span>
+            </button>
         </div>
 
-        <div id="terminal"></div>
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Chat Section -->
+            <section class="chat-section active" id="chatSection">
+                <div class="chat-container">
+                    <div class="messages" id="messages">
+                        <!-- Mensagem inicial do sistema -->
+                        <div class="message system">
+                            <div class="message-bubble">
+                                <p>Ola! Sou seu assistente de programacao BitDogLab.</p>
+                                <p>Conecte sua placa via USB e me peca para criar codigos MicroPython!</p>
+                            </div>
+                            <span class="message-time">agora</span>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-input-area">
+                        <div class="chat-input-wrapper">
+                            <input 
+                                type="text" 
+                                id="chatInput" 
+                                class="chat-input" 
+                                placeholder="Digite sua mensagem..."
+                                autocomplete="off"
+                            >
+                            <button id="chatSendBtn" class="btn-send-message">
+                                <span class="send-icon">></span>
+                            </button>
+                        </div>
+                        <div class="chat-hint">Pressione Enter para enviar</div>
+                    </div>
+                </div>
+            </section>
 
-        <div class="input-area">
-            <input type="text" id="commandInput" placeholder="Digite um comando e pressione Enter..." disabled>
-            <button id="sendBtn" class="btn btn-send" disabled>Enviar</button>
-            <button id="ctrlCBtn" class="btn btn-ctrl" disabled>Ctrl+C</button>
-            <button id="ctrlDBtn" class="btn btn-ctrl" disabled>Ctrl+D</button>
-        </div>
+            <!-- Terminal Section -->
+            <section class="terminal-section" id="terminalSection">
+                <div class="terminal-container">
+                    <div class="terminal-toolbar">
+                        <span class="terminal-title">Terminal Serial</span>
+                        <button id="clearBtn" class="btn btn-small">Limpar</button>
+                    </div>
+                    <div id="terminal" class="terminal"></div>
+                    <div class="terminal-input-area">
+                        <input 
+                            type="text" 
+                            id="commandInput" 
+                            class="terminal-input" 
+                            placeholder="Digite um comando..." 
+                            disabled
+                        >
+                        <button id="sendBtn" class="btn btn-send" disabled>Enviar</button>
+                        <button id="ctrlCBtn" class="btn btn-ctrl" disabled>Ctrl+C</button>
+                        <button id="ctrlDBtn" class="btn btn-ctrl" disabled>Ctrl+D</button>
+                    </div>
+                </div>
+            </section>
+        </main>
     </div>
 
     <script src="lib/xterm/xterm.js"></script>
