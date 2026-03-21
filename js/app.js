@@ -55,11 +55,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     term.open(document.getElementById('terminal'));
     
-    // Mensagem inicial no terminal - Tema Neon
-    term.writeln('\r\n\x1b[35m╔══════════════════════════════════════════════════╗\x1b[0m');
-    term.writeln('\x1b[35m║\x1b[0m  \x1b[96mBitDogLab AI\x1b[0m - \x1b[95mWebSerial Terminal\x1b[0m              \x1b[35m║\x1b[0m');
-    term.writeln('\x1b[35m╚══════════════════════════════════════════════════╝\x1b[0m');
-    term.writeln('\r\n\x1b[90m[*] Clique em \x1b[92m"Conectar"\x1b[90m para selecionar uma porta serial\x1b[0m');
+    // Mensagem inicial no terminal
+    term.writeln('\r\n\x1b[90m╔══════════════════════════════════════════════════╗\x1b[0m');
+    term.writeln('\x1b[90m║\x1b[0m  BitDogLab AI - WebSerial Terminal              \x1b[90m║\x1b[0m');
+    term.writeln('\x1b[90m╚══════════════════════════════════════════════════╝\x1b[0m');
+    term.writeln('\r\n\x1b[90m[*] Clique em "Conectar" para selecionar uma porta serial\x1b[0m');
     term.writeln('\x1b[90m[*] Compativel com MicroPython e BitDogLab\x1b[0m\r\n');
 
     // ==========================================
@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
     serial.onConnect(() => {
         updateUIState(true);
         term.writeln('\x1b[32m\r\n[Conectado]\x1b[0m');
-        addSystemMessage('Placa conectada! Pronto para programar.');
+        addSystemMessage('Placa conectada. Pronto para programar.');
     });
 
     serial.onDisconnect(() => {
@@ -233,16 +233,135 @@ document.addEventListener('DOMContentLoaded', () => {
         // Limpa input
         chatInput.value = '';
         
-        // Aqui sera integrado com a API de IA
-        // Por enquanto, simula uma resposta
-        simulateAIResponse(text);
+        // Envia para a IA
+        handleAIResponse(text);
     }
 
-    function simulateAIResponse(userText) {
-        // Simula delay de "pensamento"
+    async function handleAIResponse(userText) {
+        if (!ai.isConfigured()) {
+            addSystemMessage('IA nao configurada. Clique no botao * no header para configurar.');
+            return;
+        }
+
+        // Cria bolha da IA vazia para streaming
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'message ai';
+        const bubbleDiv = document.createElement('div');
+        bubbleDiv.className = 'message-bubble';
+        const contentP = document.createElement('p');
+        contentP.textContent = 'Pensando...';
+        bubbleDiv.appendChild(contentP);
+        const timeSpan = document.createElement('span');
+        timeSpan.className = 'message-time';
+        timeSpan.textContent = getCurrentTime();
+        messageDiv.appendChild(bubbleDiv);
+        messageDiv.appendChild(timeSpan);
+        messagesContainer.appendChild(messageDiv);
+        scrollToBottom();
+
+        try {
+            let started = false;
+            const fullResponse = await ai.send(userText, (chunk) => {
+                if (!started) {
+                    contentP.textContent = '';
+                    started = true;
+                }
+                contentP.textContent += chunk;
+                scrollToBottom();
+            });
+
+            // Apos streaming, renderiza com blocos de codigo clicaveis
+            renderAIMessage(bubbleDiv, fullResponse);
+
+        } catch (error) {
+            contentP.textContent = 'Erro: ' + error.message;
+            contentP.style.color = '#ff6b6b';
+        }
+    }
+
+    function renderAIMessage(bubbleDiv, text) {
+        bubbleDiv.innerHTML = '';
+
+        // Divide texto em partes: texto normal e blocos de codigo
+        const parts = text.split(/(```(?:python|micropython)?\s*\n[\s\S]*?```)/g);
+
+        parts.forEach(part => {
+            if (part.match(/^```(?:python|micropython)?\s*\n/)) {
+                // Bloco de codigo
+                const code = part.replace(/```(?:python|micropython)?\s*\n/, '').replace(/```$/, '').trim();
+
+                const codeWrapper = document.createElement('div');
+                codeWrapper.className = 'code-block';
+
+                const pre = document.createElement('pre');
+                const codeEl = document.createElement('code');
+                codeEl.textContent = code;
+                pre.appendChild(codeEl);
+                codeWrapper.appendChild(pre);
+
+                const btnSendCode = document.createElement('button');
+                btnSendCode.className = 'btn btn-send-code';
+                btnSendCode.textContent = 'Enviar para placa';
+                btnSendCode.addEventListener('click', () => sendCodeToBoard(code, btnSendCode));
+                codeWrapper.appendChild(btnSendCode);
+
+                bubbleDiv.appendChild(codeWrapper);
+            } else if (part.trim()) {
+                const lines = part.trim().split('\n');
+                lines.forEach(line => {
+                    if (line.trim()) {
+                        const p = document.createElement('p');
+                        p.textContent = line;
+                        bubbleDiv.appendChild(p);
+                    }
+                });
+            }
+        });
+    }
+
+    async function sendCodeToBoard(code, button) {
+        if (!serial.connected) {
+            addSystemMessage('Placa nao conectada. Conecte via USB primeiro.');
+            return;
+        }
+
+        button.textContent = 'Enviando...';
+        button.disabled = true;
+
+        try {
+            // Ctrl+C para garantir que esta no REPL
+            await serial.sendCtrlC();
+            await sleep(100);
+
+            // Entra no modo paste do MicroPython (Ctrl+E)
+            await serial.write('\x05');
+            await sleep(100);
+
+            // Envia o codigo linha por linha
+            const lines = code.split('\n');
+            for (const line of lines) {
+                await serial.write(line + '\r\n');
+                await sleep(20);
+            }
+
+            // Sai do modo paste e executa (Ctrl+D)
+            await serial.write('\x04');
+
+            button.textContent = 'Enviado!';
+            addSystemMessage('Codigo enviado para a placa!');
+        } catch (error) {
+            button.textContent = 'Erro ao enviar';
+            addSystemMessage('Erro ao enviar codigo: ' + error.message);
+        }
+
         setTimeout(() => {
-            addSystemMessage('IA ainda nao configurada. Aguardando integracao com API...');
-        }, 1000);
+            button.textContent = 'Enviar para placa';
+            button.disabled = false;
+        }, 2000);
+    }
+
+    function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 
     // ==========================================
@@ -292,6 +411,76 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ==========================================
+    // Modal de Configuracao da IA
+    // ==========================================
+    const configBtn = document.getElementById('configBtn');
+    const configModal = document.getElementById('configModal');
+    const configSaveBtn = document.getElementById('configSaveBtn');
+    const configCancelBtn = document.getElementById('configCancelBtn');
+    const providerSelect = document.getElementById('providerSelect');
+    const configBaseUrl = document.getElementById('configBaseUrl');
+    const configModelSelect = document.getElementById('configModel');
+    const configModelCustom = document.getElementById('configModelCustom');
+    const configApiKey = document.getElementById('configApiKey');
+
+    function openConfigModal() {
+        configModal.classList.remove('hidden');
+        // Preenche com valores salvos
+        const config = ai.getConfig();
+        configBaseUrl.value = config.baseUrl;
+        configApiKey.value = config.apiKey;
+        configModelCustom.value = config.model;
+    }
+
+    function closeConfigModal() {
+        configModal.classList.add('hidden');
+    }
+
+    configBtn.addEventListener('click', openConfigModal);
+    configCancelBtn.addEventListener('click', closeConfigModal);
+    configModal.querySelector('.modal-overlay').addEventListener('click', closeConfigModal);
+
+    providerSelect.addEventListener('change', () => {
+        const provider = AI.PROVIDERS[providerSelect.value];
+        if (provider) {
+            configBaseUrl.value = provider.baseUrl;
+            // Popula modelos
+            configModelSelect.innerHTML = '';
+            provider.models.forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m;
+                opt.textContent = m;
+                configModelSelect.appendChild(opt);
+            });
+            configModelSelect.classList.remove('hidden');
+            configModelCustom.classList.add('hidden');
+        } else {
+            // Custom
+            configBaseUrl.value = '';
+            configModelSelect.classList.add('hidden');
+            configModelCustom.classList.remove('hidden');
+            configModelCustom.value = '';
+        }
+    });
+
+    configSaveBtn.addEventListener('click', () => {
+        const baseUrl = configBaseUrl.value.trim();
+        const apiKey = configApiKey.value.trim();
+        const model = configModelCustom.classList.contains('hidden')
+            ? configModelSelect.value
+            : configModelCustom.value.trim();
+
+        if (!baseUrl || !apiKey || !model) {
+            addSystemMessage('Preencha todos os campos de configuracao.');
+            return;
+        }
+
+        ai.saveConfig(apiKey, baseUrl, model);
+        closeConfigModal();
+        addSystemMessage('IA configurada! Pode comecar a conversar.');
+    });
+
+    // ==========================================
     // Inicializacao
     // ==========================================
     if (!WebSerial.isSupported()) {
@@ -301,13 +490,18 @@ document.addEventListener('DOMContentLoaded', () => {
         addSystemMessage('Seu navegador nao suporta Web Serial. Use Chrome, Edge ou Opera.');
     }
 
-    // Expose functions for external use (Claude/AI integration)
+    // Carrega contexto do hardware
+    ai.loadContext().then(() => {
+        if (!ai.isConfigured()) {
+            addSystemMessage('Configure a IA clicando no botao * no header.');
+        }
+    });
+
+    // Expose functions for external use
     window.ChatUI = {
         addUserMessage,
         addAIMessage,
         addSystemMessage,
-        sendToTerminal: (code) => {
-            term.writeln(`\r\n\x1b[36m[Codigo recebido da IA]\x1b[0m`);
-        }
+        serial
     };
 });

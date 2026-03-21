@@ -35,10 +35,10 @@
     --color-border: #3d2b5a;
     --color-border-glow: rgba(157, 78, 221, 0.3);
     
-    /* Text */
-    --color-text: #e6e1f0;
-    --color-text-secondary: #9b8db5;
-    --color-text-muted: #6b5b8a;
+    /* Text - Mais neutro, menos roxo */
+    --color-text: #f0f0f0;
+    --color-text-secondary: #b0a8c0;
+    --color-text-muted: #7a7a8a;
     
     /* Status */
     --color-success: #39ff14;
@@ -48,11 +48,11 @@
     --color-warning: #ffd700;
     --color-info: #00d4ff;
     
-    /* Chat */
+    /* Chat - Menos roxo */
     --chat-bg: #0f0c1a;
-    --chat-bubble-user: linear-gradient(135deg, #4b2e83 0%, #6b4c9a 100%);
-    --chat-bubble-ai: linear-gradient(135deg, #1e1630 0%, #2a1f45 100%);
-    --chat-bubble-system: rgba(157, 78, 221, 0.15);
+    --chat-bubble-user: linear-gradient(135deg, #5a3d9e 0%, #4b2e83 100%);
+    --chat-bubble-ai: #1e1b2e;
+    --chat-bubble-system: rgba(157, 78, 221, 0.1);
     
     /* Dimensions */
     --header-height: 65px;
@@ -352,8 +352,7 @@ html, body {
 .status-text {
     font-size: 12px;
     font-weight: 500;
-    color: rgba(255,255,255,0.8);
-    text-shadow: 0 0 10px rgba(255,255,255,0.3);
+    color: var(--color-text-secondary);
 }
 
 /* ============================================
@@ -523,10 +522,10 @@ html, body {
 
 .message.system .message-bubble {
     background: var(--chat-bubble-system);
-    color: var(--neon-purple);
-    border: 1px solid rgba(157, 78, 221, 0.4);
+    color: var(--color-text-secondary);
+    border: 1px solid rgba(157, 78, 221, 0.3);
     font-style: italic;
-    box-shadow: 0 0 20px rgba(157, 78, 221, 0.15);
+    box-shadow: 0 0 15px rgba(157, 78, 221, 0.1);
 }
 
 .message-time {
@@ -610,9 +609,8 @@ html, body {
 .terminal-title {
     font-size: 13px;
     font-weight: 600;
-    color: var(--neon-blue);
+    color: var(--color-text-secondary);
     font-family: 'SF Mono', Monaco, monospace;
-    text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
     display: flex;
     align-items: center;
     gap: 8px;
@@ -620,7 +618,7 @@ html, body {
 
 .terminal-title::before {
     content: '>';
-    color: var(--neon-purple);
+    color: var(--color-text-muted);
 }
 
 .terminal {
