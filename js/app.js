@@ -50,13 +50,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     serial.onConnect(() => {
         updateUIState(true);
-        term.writeln('\r\n[Conectado]');
+        term.writeln('\r\n\x1b[32m[Conectado]\x1b[0m');
         addSystemMessage('Sua placa está conectada!');
     });
 
     serial.onDisconnect(() => {
         updateUIState(false);
-        term.writeln('\r\n[Desconectado]');
+        term.writeln('\r\n\x1b[31m[Desconectado]\x1b[0m');
         addSystemMessage('Placa desconectada.');
     });
 
@@ -313,7 +313,7 @@ document.addEventListener('DOMContentLoaded', () => {
         chatInput.value = '';
 
         if (!ai.isConfigured()) {
-            addSystemMessage('Configure a IA primeiro. Clique na engrenagem no header.');
+            addSystemMessage('IA nao configurada. Verifique o arquivo js/config.js');
             return;
         }
 
@@ -332,79 +332,8 @@ document.addEventListener('DOMContentLoaded', () => {
     chatSendBtn.addEventListener('click', sendChatMessage);
     chatInput.addEventListener('keypress', (e) => e.key === 'Enter' && sendChatMessage());
 
-    // ==========================================
-    // Modal de Configuracao da IA
-    // ==========================================
-    const configBtn = document.getElementById('configBtn');
-    const configModal = document.getElementById('configModal');
-    const configSaveBtn = document.getElementById('configSaveBtn');
-    const configCancelBtn = document.getElementById('configCancelBtn');
-    const providerSelect = document.getElementById('providerSelect');
-    const configBaseUrl = document.getElementById('configBaseUrl');
-    const configModelSelect = document.getElementById('configModel');
-    const configModelCustom = document.getElementById('configModelCustom');
-    const configApiKey = document.getElementById('configApiKey');
-
-    function openConfigModal() {
-        configModal.classList.remove('hidden');
-        const config = ai.getConfig();
-        configBaseUrl.value = config.baseUrl;
-        configApiKey.value = config.apiKey;
-        configModelCustom.value = config.model;
-    }
-
-    function closeConfigModal() {
-        configModal.classList.add('hidden');
-    }
-
-    configBtn.addEventListener('click', openConfigModal);
-    configCancelBtn.addEventListener('click', closeConfigModal);
-    configModal.querySelector('.modal-overlay').addEventListener('click', closeConfigModal);
-
-    providerSelect.addEventListener('change', () => {
-        const provider = AI.PROVIDERS[providerSelect.value];
-        if (provider) {
-            configBaseUrl.value = provider.baseUrl;
-            configModelSelect.innerHTML = '';
-            provider.models.forEach(m => {
-                const opt = document.createElement('option');
-                opt.value = m;
-                opt.textContent = m;
-                configModelSelect.appendChild(opt);
-            });
-            configModelSelect.classList.remove('hidden');
-            configModelCustom.classList.add('hidden');
-        } else {
-            configBaseUrl.value = '';
-            configModelSelect.classList.add('hidden');
-            configModelCustom.classList.remove('hidden');
-            configModelCustom.value = '';
-        }
-    });
-
-    configSaveBtn.addEventListener('click', () => {
-        const baseUrl = configBaseUrl.value.trim();
-        const apiKey = configApiKey.value.trim();
-        const model = configModelCustom.classList.contains('hidden')
-            ? configModelSelect.value
-            : configModelCustom.value.trim();
-
-        if (!baseUrl || !apiKey || !model) {
-            addSystemMessage('Preencha todos os campos.');
-            return;
-        }
-
-        ai.saveConfig(apiKey, baseUrl, model);
-        closeConfigModal();
-        addSystemMessage('IA configurada! Pode conversar.');
-    });
-
     // Carrega contexto do hardware
-    ai.loadContext().then(() => {
-        if (!ai.isConfigured()) {
-            addSystemMessage('Configure a IA clicando na engrenagem.');
-        }
-    });
+    ai.loadContext();
 
     window.ChatUI = {
         addUserMessage,
