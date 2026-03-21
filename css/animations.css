@@ -1,0 +1,262 @@
+/* ============================================
+   ANIMACOES SUAVES - BitDogLab AI
+   ============================================ */
+
+/* ============================================
+   MENSAGENS - Entrada suave
+   ============================================ */
+.message {
+    animation: messageIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transform-origin: bottom;
+}
+
+@keyframes messageIn {
+    0% {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+    70% {
+        transform: translateY(-5px) scale(1.02);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.message.user {
+    transform-origin: bottom right;
+}
+
+.message.ai,
+.message.system {
+    transform-origin: bottom left;
+}
+
+/* ============================================
+   BOTOES - Hover suave
+   ============================================ */
+.btn {
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.4s ease, height 0.4s ease;
+}
+
+.btn:active::after {
+    width: 200px;
+    height: 200px;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+.btn:active {
+    transform: translateY(0) scale(0.98);
+}
+
+/* ============================================
+   BOTAO ENVIAR - Efeito especial
+   ============================================ */
+.btn-send-message {
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.btn-send-message:hover {
+    transform: scale(1.1) rotate(10deg);
+    box-shadow: 0 0 30px rgba(184, 41, 221, 0.8);
+}
+
+.btn-send-message:active {
+    transform: scale(0.95) rotate(0deg);
+}
+
+/* ============================================
+   HEADER - Glow pulsante no conectar
+   ============================================ */
+.btn-connect {
+    animation: connectPulse 2s ease-in-out infinite;
+}
+
+@keyframes connectPulse {
+    0%, 100% {
+        box-shadow: 0 0 15px rgba(57, 255, 20, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 25px rgba(57, 255, 20, 0.7);
+    }
+}
+
+.btn-connect:disabled {
+    animation: none;
+}
+
+/* ============================================
+   STATUS DOT - Pulse mais suave
+   ============================================ */
+.status-dot.connected {
+    animation: statusGlow 2s ease-in-out infinite;
+}
+
+@keyframes statusGlow {
+    0%, 100% {
+        box-shadow: 0 0 10px var(--neon-green);
+    }
+    50% {
+        box-shadow: 0 0 20px var(--neon-green), 0 0 30px rgba(57, 255, 20, 0.5);
+    }
+}
+
+/* ============================================
+   TABS - Transicao suave
+   ============================================ */
+.tab-btn {
+    transition: all 0.3s ease;
+}
+
+.tab-btn::after {
+    transition: all 0.3s ease;
+}
+
+/* ============================================
+   INPUTS - Focus suave
+   ============================================ */
+.chat-input-wrapper,
+.terminal-input,
+.select {
+    transition: all 0.25s ease;
+}
+
+/* ============================================
+   CODE BLOCKS - Entrada
+   ============================================ */
+.code-block {
+    animation: codeIn 0.4s ease;
+}
+
+@keyframes codeIn {
+    0% {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* ============================================
+   SCROLLBAR - Hover
+   ============================================ */
+::-webkit-scrollbar-thumb {
+    transition: all 0.2s ease;
+}
+
+/* ============================================
+   LOADING - Animacao melhorada
+   ============================================ */
+.thinking-dots span {
+    animation: bounceSmooth 1.4s infinite ease-in-out both;
+}
+
+@keyframes bounceSmooth {
+    0%, 80%, 100% {
+        transform: translateY(0) scale(0.8);
+        opacity: 0.5;
+    }
+    40% {
+        transform: translateY(-8px) scale(1.1);
+        opacity: 1;
+    }
+}
+
+/* ============================================
+   BUBBLE CHAT - Hover sutil
+   ============================================ */
+.message-bubble {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.message:hover .message-bubble {
+    transform: scale(1.01);
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.25);
+}
+
+/* ============================================
+   TERMINAL - Cursor piscando suave
+   ============================================ */
+.xterm-cursor {
+    animation: cursorBlink 1s ease-in-out infinite;
+}
+
+@keyframes cursorBlink {
+    0%, 50% {
+        opacity: 1;
+    }
+    51%, 100% {
+        opacity: 0.3;
+    }
+}
+
+/* ============================================
+   HEADER - Glow linha animada
+   ============================================ */
+.header::after {
+    animation: glowLineMove 3s ease-in-out infinite;
+}
+
+@keyframes glowLineMove {
+    0%, 100% {
+        opacity: 0.5;
+        transform: translateX(-2px);
+    }
+    50% {
+        opacity: 1;
+        transform: translateX(2px);
+    }
+}
+
+/* ============================================
+   BADGE AI - Brilho
+   ============================================ */
+.badge {
+    animation: badgeGlow 2s ease-in-out infinite;
+}
+
+@keyframes badgeGlow {
+    0%, 100% {
+        box-shadow: 0 0 15px rgba(255, 16, 240, 0.5);
+    }
+    50% {
+        box-shadow: 0 0 25px rgba(255, 16, 240, 0.8);
+    }
+}
+
+/* ============================================
+   LOGO - Brilho sutil
+   ============================================ */
+.logo {
+    animation: logoGlow 4s ease-in-out infinite;
+}
+
+@keyframes logoGlow {
+    0%, 100% {
+        filter: brightness(1);
+    }
+    50% {
+        filter: brightness(1.1);
+    }
+}
