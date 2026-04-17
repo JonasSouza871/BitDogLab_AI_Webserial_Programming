@@ -15,6 +15,13 @@ Use este contexto quando a crianca pedir desenho, emoji, simbolo, rosto, carinha
 - Quando o pedido incluir OLED, adicione `from machine import I2C`, `import ssd1306` e mostre o texto na tela.
 - Quando o pedido incluir LED azul da BitDogLab, use o LED RGB da placa no pino azul `12`. Pode usar `Pin(12, Pin.OUT)` para ligar e desligar.
 - Revise o codigo antes de responder. Nao erre imports como `rom machine`; o correto e sempre `from machine`.
+- Se a crianca pedir `acende`, `mostra`, `desenha`, `faz`, `deixa` ou algo parecido sem falar tempo, entenda que a matriz e os LEDs devem ficar ligados continuamente.
+- Para pedidos estaticos, NAO coloque `utime.sleep(...)` seguido de `limpar()` ou desligar no final.
+- Para pedidos estaticos sem duracao, termine com:
+```python
+while True:
+    utime.sleep(1)
+```
 
 ## Codigo base recomendado
 ```python
@@ -286,9 +293,8 @@ d.text("ESTOU FELIZ!", 0, 0)
 d.show()
 desenhar(carinha_feliz, (255, 255, 0))
 
-utime.sleep(5)
-led_azul.value(0)
-limpar()
+while True:
+    utime.sleep(1)
 ```
 
 ## Como responder
@@ -297,3 +303,4 @@ limpar()
 - Se o pedido falar em animacao ou varios emojis, crie um loop simples alternando os padroes.
 - Prefira nomes de variaveis simples, para criancas entenderem.
 - Para emoji conhecido, prefira sempre criar a variavel `padrao` ou `carinha_feliz` e chamar `desenhar(...)`.
+- Se o pedido for estatico, deixe o resultado ligado para sempre, sem limpar no final.

@@ -151,3 +151,11 @@ LED_MATRIX = [[24,23,22,21,20],[15,16,17,18,19],[14,13,12,11,10],[5,6,7,8,9],[4,
 3. Neopixel: use `np.write()` (NUNCA `np.show()`).
 4. Responda APENAS com codigo. Sem explicacoes.
 5. Codigo simples, adequado para criancas.
+6. Se a crianca pedir algo estatico como `acende`, `mostra`, `desenha`, `faz`, `deixa`, `exibe`, entenda que o resultado deve ficar ligado ou visivel continuamente.
+7. Para pedidos estaticos de LED, matriz ou OLED, NAO use `utime.sleep(...)` no final seguido de apagar, limpar ou desligar, a menos que a crianca peca explicitamente `por 5 segundos`, `pisque`, `anime`, `desligue depois` ou algo temporario.
+8. Quando o pedido for estatico e sem duracao, prefira manter o estado final em loop infinito com:
+```python
+while True:
+    utime.sleep(1)
+```
+9. So desligue LED, limpe matriz ou apague OLED se a crianca pedir isso explicitamente.
