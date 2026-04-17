@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const tabBtns = document.querySelectorAll('.tab-btn');
     const chatSection = document.getElementById('chatSection');
     const terminalSection = document.getElementById('terminalSection');
+    const presentationMediaQuery = window.matchMedia('(min-width: 769px)');
 
     // Instância do WebSerial
     const serial = new WebSerial();
@@ -215,6 +216,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function addUserMessage(text) { addMessage(text, 'user'); }
     function addSystemMessage(text) { addMessage(text, 'system'); }
+
+    function fitCodeBlocksForPresentation() {
+        if (!document.body.classList.contains('presentation-mode')) return;
+
+        const codeBlocks = document.querySelectorAll('.code-block');
+        codeBlocks.forEach((block) => {
+            const pre = block.querySelector('pre');
+            const codeEl = block.querySelector('code');
+            if (!pre || !codeEl) return;
+
+            const lines = codeEl.textContent.split('\n');
+            const longestLine = lines.reduce((max, line) => Math.max(max, line.length), 1);
+            const availableWidth = Math.max(pre.clientWidth - 12, 100);
+            const availableHeight = Math.max(pre.clientHeight - 12, 100);
+
+            const widthBasedSize = availableWidth / (longestLine * 0.62);
+            const heightBasedSize = availableHeight / (Math.max(lines.length, 1) * 1.12);
+            const fontSize = Math.max(14, Math.min(22, Math.floor(Math.min(widthBasedSize, heightBasedSize))));
+
+            codeEl.style.fontSize = `${fontSize}px`;
+            codeEl.style.lineHeight = '1.12';
+        });
+    }
+
+    function updatePresentationMode() {
+        document.body.classList.toggle('presentation-mode', presentationMediaQuery.matches);
+        requestAnimationFrame(fitCodeBlocksForPresentation);
+    }
     
     function addSystemMessageHTML(html) {
         const messageDiv = document.createElement('div');
@@ -271,6 +300,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 messagesContainer.appendChild(messageDiv);
             });
+            requestAnimationFrame(fitCodeBlocksForPresentation);
         } else {
             // Sem codigo - mostra texto normal
             addMessage(text, 'ai');
@@ -405,6 +435,8 @@ document.addEventListener('DOMContentLoaded', () => {
         serial
     };
 
+    updatePresentationMode();
+
     // Mobile tabs
     tabBtns.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -424,7 +456,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Resize
-    window.addEventListener('resize', () => setTimeout(() => term.fit?.(), 100));
+    presentationMediaQuery.addEventListener('change', updatePresentationMode);
+    window.addEventListener('resize', () => {
+        updatePresentationMode();
+        setTimeout(() => term.fit?.(), 100);
+    });
 
     // Verificação inicial
     if (!WebSerial.isSupported()) {

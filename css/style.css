@@ -794,99 +794,151 @@ html, body {
         display: none;
     }
     
+    body.presentation-mode .header {
+        display: none;
+    }
+
     .main {
         flex-direction: row;
     }
     
-    .chat-section {
+    body.presentation-mode .app,
+    body.presentation-mode .main,
+    body.presentation-mode .chat-container {
+        height: 100vh;
+    }
+
+    body.presentation-mode .chat-section {
         display: flex !important;
         width: 100%;
         height: 100%;
     }
     
-    .terminal-section {
+    body.presentation-mode .terminal-section {
         display: none !important;
         width: 0;
         height: 100%;
     }
     
-    .chat-section {
+    body.presentation-mode .chat-section {
         border-right: none;
         box-shadow: none;
         z-index: 1;
     }
     
-    .messages {
-        padding: 28px 36px 36px;
-        gap: 22px;
+    body.presentation-mode .messages {
+        flex: 1;
+        min-height: 0;
+        padding: 12px 18px 10px;
+        gap: 10px;
+        display: grid;
+        grid-template-rows: auto 1fr;
+        overflow: hidden;
     }
 
-    .message {
+    body.presentation-mode .messages > .message:not(:nth-last-child(-n+2)) {
+        display: none;
+    }
+
+    body.presentation-mode .message {
         width: 100%;
         max-width: none;
         align-self: stretch;
         align-items: stretch;
     }
 
-    .message.user,
-    .message.ai,
-    .message.system {
+    body.presentation-mode .message.user,
+    body.presentation-mode .message.ai,
+    body.presentation-mode .message.system {
         align-self: stretch;
         align-items: stretch;
     }
 
-    .message-bubble {
+    body.presentation-mode .message.user {
+        margin: 0;
+    }
+
+    body.presentation-mode .message.ai {
+        min-height: 0;
+    }
+
+    body.presentation-mode .message-bubble {
         width: 100%;
-        padding: 22px 28px;
-        border-radius: 24px;
-        font-size: 18px;
-        line-height: 1.75;
+        padding: 14px 18px;
+        border-radius: 20px;
+        font-size: 16px;
+        line-height: 1.38;
     }
 
-    .message.user .message-bubble,
-    .message.ai .message-bubble,
-    .message.system .message-bubble {
-        border-bottom-left-radius: 24px;
-        border-bottom-right-radius: 24px;
+    body.presentation-mode .message.user .message-bubble,
+    body.presentation-mode .message.ai .message-bubble,
+    body.presentation-mode .message.system .message-bubble {
+        border-bottom-left-radius: 20px;
+        border-bottom-right-radius: 20px;
     }
 
-    .message-time {
-        align-self: flex-end;
-        margin-top: 8px;
-        font-size: 12px;
+    body.presentation-mode .message.user .message-bubble {
+        font-size: 17px;
+        line-height: 1.35;
     }
 
-    .code-block {
+    body.presentation-mode .message-time {
+        display: none;
+    }
+
+    body.presentation-mode .code-block {
         width: 100%;
         margin: 0;
-        border-radius: 22px;
+        height: 100%;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        border-radius: 18px;
         box-shadow: 0 16px 40px rgba(0,0,0,0.45);
     }
 
-    .code-block pre {
-        padding: 28px 32px;
-    }
-
-    .code-block code {
-        font-size: 19px;
-        line-height: 1.9;
-    }
-
-    .btn-send-code {
+    body.presentation-mode .code-block pre {
+        flex: 1;
+        min-height: 0;
         padding: 16px 20px;
-        font-size: 15px;
+        overflow: hidden;
     }
 
-    .chat-input-area {
-        padding: 18px 32px 24px;
-    }
-
-    .chat-input {
+    body.presentation-mode .code-block code {
+        display: block;
+        font-family: Consolas, 'Lucida Console', monospace;
         font-size: 18px;
+        font-weight: 600;
+        line-height: 1.12;
+        white-space: pre;
+        text-shadow: 0 0 10px rgba(0, 212, 255, 0.15);
     }
 
-    .chat-hint {
-        font-size: 12px;
+    body.presentation-mode .btn-send-code {
+        display: none;
+    }
+
+    body.presentation-mode .chat-input-area {
+        padding: 8px 14px 10px;
+    }
+
+    body.presentation-mode .chat-input-wrapper {
+        gap: 10px;
+        padding: 4px 4px 4px 14px;
+    }
+
+    body.presentation-mode .chat-input {
+        font-size: 14px;
+        padding: 6px 0;
+    }
+
+    body.presentation-mode .btn-send-message {
+        width: 36px;
+        height: 36px;
+    }
+
+    body.presentation-mode .chat-hint {
+        display: none;
     }
 }
 
