@@ -350,7 +350,6 @@ document.addEventListener('DOMContentLoaded', () => {
             await serial.write('\x04');
 
             button.textContent = 'Enviado!';
-            addSystemMessage('Código enviado com sucesso!');
         } catch (error) {
             button.textContent = 'Erro';
             addSystemMessage('Erro ao enviar: ' + error.message);
