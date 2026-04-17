@@ -10,6 +10,11 @@ Use este contexto quando a crianca pedir desenho, emoji, simbolo, rosto, carinha
 - Se a crianca pedir mais de um emoji, pode alternar os desenhos com `utime.sleep()`.
 - Se o pedido vier com o proprio emoji, converta para a chave equivalente abaixo.
 - Se o emoji nao estiver na lista, desenhe a versao mais simples possivel em 5x5.
+- Para emojis conhecidos desta lista, COPIE EXATAMENTE o padrao pronto. Nao invente outro.
+- NUNCA desenhe emoji conhecido com varios `if`, `elif` ou contas por linha/coluna. Use sempre uma lista de 5 strings com `"0"` e `"1"`.
+- Quando o pedido incluir OLED, adicione `from machine import I2C`, `import ssd1306` e mostre o texto na tela.
+- Quando o pedido incluir LED azul da BitDogLab, use o LED RGB da placa no pino azul `12`. Pode usar `Pin(12, Pin.OUT)` para ligar e desligar.
+- Revise o codigo antes de responder. Nao erre imports como `rom machine`; o correto e sempre `from machine`.
 
 ## Codigo base recomendado
 ```python
@@ -34,6 +39,23 @@ def desenhar(padrao, cor):
                 np[indice] = cor
     np.write()
 ```
+
+## Forma obrigatoria para emoji conhecido
+Use esta estrutura quando o emoji estiver na lista:
+
+```python
+padrao = [
+    "00000",
+    "01010",
+    "00000",
+    "10001",
+    "01110",
+]
+
+desenhar(padrao, (255, 255, 0))
+```
+
+Nao substitua esse formato por varios `if/elif`.
 
 ## Emojis e padroes prontos
 
@@ -217,8 +239,61 @@ Cor sugerida: `(60, 40, 20)`
 ]
 ```
 
+## Exemplo completo pronto
+
+### Carinha feliz amarela na matriz + "ESTOU FELIZ!" no OLED + azul ligado
+Copie este estilo quando o pedido for parecido:
+
+```python
+from machine import Pin, I2C
+import neopixel
+import utime
+import ssd1306
+
+np = neopixel.NeoPixel(Pin(7), 25)
+LED_MATRIX = [[24,23,22,21,20],[15,16,17,18,19],[14,13,12,11,10],[5,6,7,8,9],[4,3,2,1,0]]
+
+i2c = I2C(1, scl=Pin(3), sda=Pin(2), freq=400000)
+d = ssd1306.SSD1306_I2C(128, 64, i2c)
+
+led_azul = Pin(12, Pin.OUT)
+
+def limpar():
+    for i in range(25):
+        np[i] = (0, 0, 0)
+    np.write()
+
+def desenhar(padrao, cor):
+    limpar()
+    for linha in range(5):
+        for coluna in range(5):
+            if padrao[linha][coluna] == "1":
+                indice = LED_MATRIX[linha][coluna]
+                np[indice] = cor
+    np.write()
+
+carinha_feliz = [
+    "00000",
+    "01010",
+    "00000",
+    "10001",
+    "01110",
+]
+
+led_azul.value(1)
+d.fill(0)
+d.text("ESTOU FELIZ!", 0, 0)
+d.show()
+desenhar(carinha_feliz, (255, 255, 0))
+
+utime.sleep(5)
+led_azul.value(0)
+limpar()
+```
+
 ## Como responder
 - Responda apenas com codigo MicroPython completo.
 - Se o pedido for um unico emoji, mostre o desenho parado.
 - Se o pedido falar em animacao ou varios emojis, crie um loop simples alternando os padroes.
 - Prefira nomes de variaveis simples, para criancas entenderem.
+- Para emoji conhecido, prefira sempre criar a variavel `padrao` ou `carinha_feliz` e chamar `desenhar(...)`.
