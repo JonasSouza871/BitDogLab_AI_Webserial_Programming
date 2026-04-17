@@ -23,6 +23,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const chatSection = document.getElementById('chatSection');
     const terminalSection = document.getElementById('terminalSection');
     const presentationMediaQuery = window.matchMedia('(min-width: 769px)');
+    const urlParams = new URLSearchParams(window.location.search);
+    let presentationModeEnabled = ['1', 'true', 'yes'].includes((urlParams.get('presentation') || '').toLowerCase());
 
     // Instância do WebSerial
     const serial = new WebSerial();
@@ -241,7 +243,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updatePresentationMode() {
-        document.body.classList.toggle('presentation-mode', presentationMediaQuery.matches);
+        const isPresentationMode = presentationModeEnabled && presentationMediaQuery.matches;
+        document.body.classList.toggle('presentation-mode', isPresentationMode);
+
+        if (!isPresentationMode) {
+            document.querySelectorAll('.code-block code').forEach((codeEl) => {
+                codeEl.style.fontSize = '';
+                codeEl.style.lineHeight = '';
+            });
+        }
+
         requestAnimationFrame(fitCodeBlocksForPresentation);
     }
     
@@ -436,6 +447,15 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     updatePresentationMode();
+
+    document.addEventListener('keydown', (event) => {
+        const isPresentationShortcut = (event.ctrlKey || event.metaKey) && event.shiftKey && event.key.toLowerCase() === 'p';
+        if (!isPresentationShortcut) return;
+
+        event.preventDefault();
+        presentationModeEnabled = !presentationModeEnabled;
+        updatePresentationMode();
+    });
 
     // Mobile tabs
     tabBtns.forEach(btn => {
