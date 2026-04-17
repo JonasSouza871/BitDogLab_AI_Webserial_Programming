@@ -795,7 +795,53 @@ html, body {
     }
     
     body.presentation-mode .header {
+        position: fixed;
+        right: 14px;
+        bottom: 14px;
+        left: auto;
+        width: auto;
+        height: auto;
+        padding: 8px 10px;
+        border-radius: 18px;
+        z-index: 50;
+        background: rgba(22, 18, 33, 0.92);
+        border: 1px solid rgba(157, 78, 221, 0.35);
+        box-shadow: 0 14px 32px rgba(0, 0, 0, 0.34);
+        backdrop-filter: blur(10px);
+    }
+
+    body.presentation-mode .header::after {
         display: none;
+    }
+
+    body.presentation-mode .header-brand,
+    body.presentation-mode .token-tracker {
+        display: none;
+    }
+
+    body.presentation-mode .header-controls {
+        gap: 8px;
+    }
+
+    body.presentation-mode .header .btn {
+        padding: 8px 12px;
+        font-size: 12px;
+        min-height: 34px;
+    }
+
+    body.presentation-mode .header .btn-icon {
+        font-size: 14px;
+    }
+
+    body.presentation-mode .status-indicator {
+        margin-left: 0;
+        padding-left: 0;
+        border-left: none;
+        gap: 6px;
+    }
+
+    body.presentation-mode .status-text {
+        font-size: 11px;
     }
 
     .main {

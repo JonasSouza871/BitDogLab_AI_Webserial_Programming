@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const terminalSection = document.getElementById('terminalSection');
     const presentationMediaQuery = window.matchMedia('(min-width: 769px)');
     const urlParams = new URLSearchParams(window.location.search);
-    let presentationModeEnabled = ['1', 'true', 'yes'].includes((urlParams.get('presentation') || '').toLowerCase());
+    let presentationModeEnabled = !['0', 'false', 'no'].includes((urlParams.get('presentation') || '').toLowerCase());
 
     // Instância do WebSerial
     const serial = new WebSerial();
