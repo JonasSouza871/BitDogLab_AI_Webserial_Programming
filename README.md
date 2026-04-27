@@ -13,18 +13,22 @@ short_description: Browser-based assistant for generating and sending MicroPytho
   <img src="images/icon-bitdoglab-nobg.png" alt="BitDogLab logo" width="88" />
   <h1>BitDogLab AI WebSerial</h1>
   <p>AI-assisted browser interface for generating, reviewing, and sending MicroPython code to BitDogLab V7 boards through Web Serial.</p>
-  <p>
-    <img src="https://img.shields.io/badge/Python-3.11-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.11" />
-    <img src="https://img.shields.io/badge/Flask-Backend-000000?style=for-the-badge&logo=flask&logoColor=white" alt="Flask Backend" />
-    <img src="https://img.shields.io/badge/HTML5-Interface-E34F26?style=for-the-badge&logo=html5&logoColor=white" alt="HTML5 Interface" />
-    <img src="https://img.shields.io/badge/CSS3-Styling-1572B6?style=for-the-badge&logo=css3&logoColor=white" alt="CSS3 Styling" />
-    <img src="https://img.shields.io/badge/JavaScript-Frontend-F7DF1E?style=for-the-badge&logo=javascript&logoColor=111111" alt="JavaScript Frontend" />
-    <img src="https://img.shields.io/badge/Web%20Serial-Device%20Link-0F766E?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Web Serial Device Link" />
-    <img src="https://img.shields.io/badge/xterm.js-Terminal-166534?style=for-the-badge&logo=gnu-bash&logoColor=white" alt="xterm.js Terminal" />
-    <img src="https://img.shields.io/badge/Docker-Deploy-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker Deploy" />
-    <img src="https://img.shields.io/badge/MicroPython-Target-2B2728?style=for-the-badge&logo=micropython&logoColor=white" alt="MicroPython Target" />
-    <img src="https://img.shields.io/badge/Groq-AI%20Proxy-F55036?style=for-the-badge&logo=groq&logoColor=white" alt="Groq AI Proxy" />
-  </p>
+  <table>
+    <tr>
+      <td><img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python" /></td>
+      <td><img src="https://img.shields.io/badge/Flask-000000?style=for-the-badge&logo=flask&logoColor=white" alt="Flask" /></td>
+      <td><img src="https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white" alt="HTML5" /></td>
+      <td><img src="https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white" alt="CSS3" /></td>
+      <td><img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=111111" alt="JavaScript" /></td>
+    </tr>
+    <tr>
+      <td><img src="https://img.shields.io/badge/Web%20Serial-0F766E?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Web Serial" /></td>
+      <td><img src="https://img.shields.io/badge/xterm.js-241F31?style=for-the-badge&logo=gnubash&logoColor=white" alt="xterm.js" /></td>
+      <td><img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker" /></td>
+      <td><img src="https://img.shields.io/badge/MicroPython-2B2728?style=for-the-badge&logo=micropython&logoColor=white" alt="MicroPython" /></td>
+      <td><img src="https://img.shields.io/badge/OpenAI%20Compatible-412991?style=for-the-badge&logo=openai&logoColor=white" alt="OpenAI Compatible APIs" /></td>
+    </tr>
+  </table>
   <p><strong><a href="#portugues">Português</a> | <a href="#english">English</a></strong></p>
 </div>
 
@@ -59,13 +63,17 @@ Terminal embutido (xterm.js) <-> Web Serial API <-> REPL da placa
 ```
 
 ## Stack técnica
-- Frontend: HTML5, CSS3 e JavaScript puro.
-- Backend: Python 3.11, Flask e Requests.
-- Comunicação com dispositivo: Web Serial API.
-- Terminal: xterm.js.
-- Camada de IA: APIs compatíveis com o formato OpenAI, com fluxo opcional de proxy via Flask e Groq.
-- Deploy: Docker.
-- Runtime alvo: MicroPython na BitDogLab V7 / Raspberry Pi Pico W.
+- HTML5
+- CSS3
+- JavaScript
+- Python 3.11
+- Flask
+- Requests
+- Web Serial API
+- xterm.js
+- Docker
+- MicroPython
+- OpenAI-compatible APIs
 
 ## Estrutura do repositório
 ```text
@@ -165,13 +173,17 @@ Embedded terminal (xterm.js) <-> Web Serial API <-> Board REPL
 ```
 
 ## Technical stack
-- Frontend: HTML5, CSS3, vanilla JavaScript.
-- Backend: Python 3.11, Flask, Requests.
-- Device communication: Web Serial API.
-- Terminal: xterm.js.
-- AI layer: OpenAI-compatible chat APIs, with optional Groq proxy flow through Flask.
-- Deployment: Docker.
-- Target runtime: MicroPython on BitDogLab V7 / Raspberry Pi Pico W.
+- HTML5
+- CSS3
+- JavaScript
+- Python 3.11
+- Flask
+- Requests
+- Web Serial API
+- xterm.js
+- Docker
+- MicroPython
+- OpenAI-compatible APIs
 
 ## Repository structure
 ```text
